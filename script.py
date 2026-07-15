@@ -1,7 +1,7 @@
 import aiohttp
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
-from typing import Any, Optional
+from typing import Any
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 OPEN_METEO_PARAMETERS: dict[str, str] = {
@@ -22,7 +22,10 @@ async def get_current_weather(
     lon: float = Query(..., ge=-180, le=180, description="longitude"),
 ) -> dict[str, float]:
     """Method №1: get current temperature, wind speed, pressure."""
-    return await fetch_current_weather(lat, lon)
+
+    data = await fetch_current_weather(lat, lon)
+    return data
+
 
 async def fetch_current_weather(
     lat: float,
@@ -30,17 +33,6 @@ async def fetch_current_weather(
     fetch_params: list[str] = ["temp", "wind_speed", "pressure"],
 ) -> dict[str, float]:
     """Fetch current weather data from Open-Meteo API.
-
-    Args:
-        lat: Latitude in degrees.
-        lon: Longitude in degrees.
-        fetch_params: Parameters to fetch.
-
-    Returns:
-        Dict with parameter names as keys and float values.
-
-    Raises:
-        HTTPException 502: On API error, network error, or unexpected response.
 
     Example:
         >>> await fetch_current_weather(55.7558, 37.6173)
@@ -76,8 +68,3 @@ async def fetch_current_weather(
 
     except aiohttp.ClientError:
         raise HTTPException(status_code=502, detail="Open-Meteo API connection error")
-
-    except KeyError:
-        raise HTTPException(
-            status_code=502, detail="Unexpected Open-Meteo API response"
-        )
