@@ -1,10 +1,10 @@
 import aiohttp
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
-from typing import TypeAlias, Any
+from typing import Any, Optional
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
-OPEN_METEO_PARAMETER_NAMES: dict[str, str] = {
+OPEN_METEO_PARAMETERS: dict[str, str] = {
     "temp": "temperature_2m",
     "wind_speed": "wind_speed_10m",
     "pressure": "surface_pressure",
@@ -13,30 +13,16 @@ OPEN_METEO_PARAMETER_NAMES: dict[str, str] = {
 }
 
 
-# Pydantic Models
-class CurrentWeatherResponse(BaseModel):
-    temp: float = Field(description="Temperature in °C")
-    wind_speed: float = Field(description="Wind speed in km/h")
-    pressure: float = Field(description="Atmospheric pressure in gPa")
-
-
 app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS")
-
-
-@app.get("/")
-async def root() -> dict[str, str]:
-    return {"message": "Hello, InfoTeCS!"}
 
 
 @app.get("/weather/current")
 async def get_current_weather(
     lat: float = Query(..., ge=-90, le=90, description="latitude"),
     lon: float = Query(..., ge=-180, le=180, description="longitude"),
-) -> CurrentWeatherResponse:
-    """Method №1: current temperature, wind speed, pressure."""
-    data = await fetch_current_weather(lat, lon)
-    return CurrentWeatherResponse(**data)
-
+) -> dict[str, float]:
+    """Method №1: get current temperature, wind speed, pressure."""
+    return await fetch_current_weather(lat, lon)
 
 async def fetch_current_weather(
     lat: float,
@@ -48,10 +34,10 @@ async def fetch_current_weather(
     Args:
         lat: Latitude in degrees.
         lon: Longitude in degrees.
-        fetch_params: Short parameter names to fetch.
+        fetch_params: Parameters to fetch.
 
     Returns:
-        Dict with short parameter names as keys and float values.
+        Dict with parameter names as keys and float values.
 
     Raises:
         HTTPException 502: On API error, network error, or unexpected response.
@@ -61,17 +47,17 @@ async def fetch_current_weather(
         {"temp": 18.5, "wind_speed": 3.2, "pressure": 1012.0}
     """
 
-    aiohttp_query_params: dict[str, float | list[str]] = {
-        "latitude": lat,
-        "longitude": lon,
-        "current": [OPEN_METEO_PARAMETER_NAMES[param] for param in fetch_params],
-    }
-
     try:
         async with aiohttp.ClientSession() as session:
+            params: dict[str, float | list[str]] = {
+                "latitude": lat,
+                "longitude": lon,
+                "current": [OPEN_METEO_PARAMETERS[param] for param in fetch_params],
+            }
+
             async with session.get(
                 OPEN_METEO_URL,
-                params=aiohttp_query_params,
+                params=params,
                 timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
                 if response.status != 200:
@@ -79,10 +65,12 @@ async def fetch_current_weather(
                         status_code=502,
                         detail=f"Open-Meteo API error: status {response.status}",
                     )
+
                 response_json: dict[str, Any] = await response.json()
                 weather_data: dict[str, Any] = response_json["current"]
+
                 return {
-                    key: float(weather_data[OPEN_METEO_PARAMETER_NAMES[key]])
+                    key: float(weather_data[OPEN_METEO_PARAMETERS[key]])
                     for key in fetch_params
                 }
 
