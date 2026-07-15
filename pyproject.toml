@@ -11,3 +11,11 @@ dependencies = [
     "sqlalchemy>=2.0.51",
     "uvicorn>=0.51.0",
 ]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.0",
+]
+
+[tool.mypy]
+strict = true
