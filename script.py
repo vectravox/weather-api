@@ -1,6 +1,5 @@
 import aiohttp
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
 from typing import Any
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
@@ -18,19 +17,24 @@ app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS"
 
 @app.get("/weather/current")
 async def get_current_weather(
-    lat: float = Query(..., ge=-90, le=90, description="latitude"),
-    lon: float = Query(..., ge=-180, le=180, description="longitude"),
+    lat: float = Query(..., ge=-90, le=90, description="Latitude"),
+    lon: float = Query(..., ge=-180, le=180, description="Longitude"),
+    fetch_params: list[str] = Query(None, description="Fields to return"),
 ) -> dict[str, float]:
     """Method №1: get current temperature, wind speed, pressure."""
 
-    data = await fetch_current_weather(lat, lon)
+    # Default params
+    if fetch_params is None or fetch_params[0] == "":
+        fetch_params = ["temp", "wind_speed", "pressure"]
+
+    data = await fetch_current_weather(lat, lon, fetch_params)
     return data
 
 
 async def fetch_current_weather(
     lat: float,
     lon: float,
-    fetch_params: list[str] = ["temp", "wind_speed", "pressure"],
+    fetch_params: list[str],
 ) -> dict[str, float]:
     """Fetch current weather data from Open-Meteo API.
 
@@ -44,7 +48,9 @@ async def fetch_current_weather(
             params: dict[str, float | list[str]] = {
                 "latitude": lat,
                 "longitude": lon,
-                "current": [OPEN_METEO_PARAMETERS[param] for param in fetch_params],
+                "current": [
+                    OPEN_METEO_PARAMETERS.get(param, param) for param in fetch_params
+                ],
             }
 
             async with session.get(
@@ -62,9 +68,12 @@ async def fetch_current_weather(
                 weather_data: dict[str, Any] = response_json["current"]
 
                 return {
-                    key: float(weather_data[OPEN_METEO_PARAMETERS[key]])
-                    for key in fetch_params
+                    param: float(weather_data[OPEN_METEO_PARAMETERS.get(param, param)])
+                    for param in fetch_params
                 }
 
     except aiohttp.ClientError:
         raise HTTPException(status_code=502, detail="Open-Meteo API connection error")
+
+    # except KeyError:
+    #     raise HTTPException(status_code=502, detail="Invalid Key")
