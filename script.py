@@ -4,25 +4,27 @@ from pydantic import BaseModel, Field
 from typing import TypeAlias
 
 JsonDict: TypeAlias = dict[str, "JsonDict | list | str | int | float | bool | None"]
-WeatherData: TypeAlias = dict[str, float]
 
 app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS")
 
 
 # Pydantic Models
 class CurrentWeatherResponse(BaseModel):
-    temperature_2m: float = Field(description="Temperature in °C")
-    wind_speed_10m: float = Field(description="Wind speed in km/h")
-    surface_pressure: float = Field(description="Atmospheric pressure in gPa")
+    temp: float = Field(description="Temperature in °C")
+    wind_speed: float = Field(description="Wind speed in km/h")
+    pressure: float = Field(description="Atmospheric pressure in gPa")
 
 
-API_PARAMETER_NAMES: dict[str, str] = {
+OPEN_METEO_PARAMETER_NAMES: dict[str, str] = {
     "temp": "temperature_2m",
-    "wind": "wind_speed_10m",
+    "wind_speed": "wind_speed_10m",
     "pressure": "surface_pressure",
     "humidity": "relative_humidity_2m",
     "precipitation": "precipitation",
 }
+
+# Reversed OPEN_METEO_PARAMETER_NAMES dict
+SHORT_PARAMETER_NAMES: dict[str, str] = {v: k for k, v in OPEN_METEO_PARAMETER_NAMES.items()}
 
 
 @app.get("/")
@@ -40,27 +42,33 @@ async def get_current_weather(
     return CurrentWeatherResponse(**data)
 
 
-async def fetch_current_weather(lat: float, lon: float) -> JsonDict:
+async def fetch_current_weather(
+    lat: float, lon: float, params: list[str] = ["temp", "wind_speed", "pressure"]
+) -> JsonDict:
     """Current weather Open-Meteo API request."""
     url = "https://api.open-meteo.com/v1/forecast"
-    params = {
+
+    requested_params = {
         "latitude": lat,
         "longitude": lon,
-        "current": ["temperature_2m", "wind_speed_10m", "surface_pressure"],
+        "current": [OPEN_METEO_PARAMETER_NAMES[param] for param in params],
     }
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, params=params, timeout=10) as response:
+            async with session.get(
+                url, params=requested_params, timeout=10
+            ) as response:
                 if response.status != 200:
                     raise HTTPException(
                         status_code=502,
                         detail=f"Open-Meteo API error: status {response.status}",
                     )
-                response_json = await response.json()
-                weather_data: WeatherData = response_json["current"]
+                response_json: JsonDict = await response.json()
+                weather_data: JsonDict = response_json["current"]
                 return {
-                    k: weather_data[k] for k in params["current"] if k in weather_data
+                    SHORT_PARAMETER_NAMES[key]: float(weather_data[key])
+                    for key in requested_params["current"]
                 }
 
     except aiohttp.ClientError:
