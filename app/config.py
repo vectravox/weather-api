@@ -1,5 +1,6 @@
 """Configuration constants for the Weather API."""
 
+DATABASE_URL: str = "sqlite:///./weather.db"
 OPEN_METEO_URL: str = "https://api.open-meteo.com/v1/forecast"
 OPEN_METEO_PARAMS: dict[str, str] = {
     "temp": "temperature_2m",
