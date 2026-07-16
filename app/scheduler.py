@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from .config import (
     FORECAST_UPDATE_INTERVAL_MINUTES,
     JOBS_DATABASE_URL,
+    OPEN_METEO_PARAMS,
     REQUEST_DELAY_SECONDS,
 )
 from .crud import update_city_forecast
@@ -36,18 +37,12 @@ async def update_forecasts() -> None:
                 forecast_data = await fetch_data(
                     city.latitude,
                     city.longitude,
-                    fetch_params=[
-                        "temp",
-                        "wind_speed",
-                        "pressure",
-                        "humidity",
-                        "precipitation",
-                    ],
+                    fetch_params=list(OPEN_METEO_PARAMS),
                     forecast_type="hourly",
                 )
                 update_city_forecast(db, city.id, forecast_data)
                 logger.info(
-                    f"--- Updated forecast for {city.name}, user_id: {city.user.id}"
+                    f"--- Updated forecast for {city.name} for user_id: {city.user.id}"
                 )
                 await asyncio.sleep(REQUEST_DELAY_SECONDS)
 
