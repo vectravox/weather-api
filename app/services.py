@@ -57,11 +57,20 @@ async def fetch_data(
     fetch_params: list[str] | None = None,
     forecast_type: ForecastType = "current",
 ) -> dict[str, Any]:
-    """Fetch current weather data from Open-Meteo API.
+    """Fetch weather data from Open-Meteo API.
 
-    Example:
-        >>> await fetch_current_weather(55.7558, 37.6173)
-        {"temp": 18.5, "wind_speed": 3.2, "pressure": 1012.0}
+    Retrieves either current weather or hourly forecast for the specified
+    location and parameters.
+
+    Args:
+        lat: Latitude in degrees (-90 to 90).
+        lon: Longitude in degrees (-180 to 180).
+        fetch_params: List of parameter names to fetch.
+            Available: "temp", "wind_speed", "pressure", "humidity", "precipitation".
+            Defaults to ["temp", "wind_speed", "pressure"].
+        forecast_type: Type of forecast to fetch.
+            - "current": Real-time weather at the moment of request.
+            - "hourly": Hourly forecast for the current day (24 entries).
     """
 
     fetch_params = parse_params(fetch_params)
