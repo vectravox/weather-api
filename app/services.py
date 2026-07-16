@@ -5,27 +5,27 @@ This module contains business logic for:
 - Fetching weather data from Open-Meteo API
 """
 
-import aiohttp
-from typing import Any
-from fastapi import HTTPException
-from . import config
-from typing import Literal
+from typing import Any, Literal
 
+import aiohttp
+from fastapi import HTTPException
+
+from . import config
 
 ForecastType = Literal["current", "hourly"]
 
 
 def split_params_by_comma(params: list[str]) -> list[str]:
-    """Splits query parameters with comma into separate items.
+    """Split query parameters with comma into separate items.
 
     Example:
-        # For query strings like:
+        # Query string:
         /weather/current?lat=56.36&lon=84.51&params=temp,wind_speed&params=pressure
 
         >>> split_params_by_comma(["temp,wind_speed", "pressure"])
         ["temp", "wind_speed", "pressure"]
-    """
 
+    """
     result: list[str] = []
 
     for param in params:
@@ -39,7 +39,6 @@ def split_params_by_comma(params: list[str]) -> list[str]:
 
 def parse_params(params: list[str] | None) -> list[str]:
     """Parse query parameters and apply defaults."""
-
     if params is None:
         return config.DEFAULT_PARAMS.copy()
 
@@ -71,8 +70,8 @@ async def fetch_data(
         forecast_type: Type of forecast to fetch.
             - "current": Real-time weather at the moment of request.
             - "hourly": Hourly forecast for the current day (24 entries).
-    """
 
+    """
     fetch_params = parse_params(fetch_params)
 
     try:
