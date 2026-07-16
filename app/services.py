@@ -5,13 +5,13 @@ This module contains business logic for:
 - Fetching weather data from Open-Meteo API
 """
 
-from typing import Any, Literal
 from datetime import UTC, datetime
+from typing import Any, Literal
 
 import aiohttp
 from fastapi import HTTPException
 
-from . import config
+from .config import DEFAULT_PARAMS, OPEN_METEO_PARAMS, OPEN_METEO_URL
 
 ForecastType = Literal["current", "hourly"]
 
@@ -46,12 +46,12 @@ def split_params_by_comma(params: list[str]) -> list[str]:
 def parse_params(params: list[str] | None) -> list[str]:
     """Parse query parameters and apply defaults."""
     if params is None:
-        return config.DEFAULT_PARAMS.copy()
+        return DEFAULT_PARAMS.copy()
 
     result = split_params_by_comma(params)
 
     if not result:
-        return config.DEFAULT_PARAMS.copy()
+        return DEFAULT_PARAMS.copy()
 
     return result
 
@@ -61,7 +61,7 @@ async def fetch_data(
     lon: float,
     fetch_params: list[str] | None = None,
     forecast_type: ForecastType = "current",
-) -> dict[str, float] | dict [str, list[float]]:
+) -> dict[str, Any]:
     """Fetch weather data from Open-Meteo API.
 
     Retrieves either current weather or hourly forecast for the specified
@@ -88,11 +88,11 @@ async def fetch_data(
                 "forecast_days": 1,
             }
             params[forecast_type] = [
-                config.OPEN_METEO_PARAMS[param] for param in fetch_params
+                OPEN_METEO_PARAMS[param] for param in fetch_params
             ]
 
             async with session.get(
-                config.OPEN_METEO_URL,
+                OPEN_METEO_URL,
                 params=params,
                 timeout=aiohttp.ClientTimeout(total=10),
             ) as response:
@@ -106,7 +106,7 @@ async def fetch_data(
                 data: dict[str, Any] = response_json[forecast_type]
 
                 return {
-                    param: data[config.OPEN_METEO_PARAMS[param]]
+                    param: data[OPEN_METEO_PARAMS[param]]
                     for param in fetch_params
                 }
 

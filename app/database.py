@@ -1,10 +1,8 @@
 """Database models and connection setup."""
 
 from collections.abc import Iterator
-from typing import Any
 from datetime import datetime
-
-from .services import utc_now
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -24,11 +22,11 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-from . import config
-
+from .config import DATABASE_URL
+from .services import utc_now
 
 # Database connection
-engine = create_engine(config.DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

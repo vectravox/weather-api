@@ -12,7 +12,6 @@ from .database import City, User
 from .services import utc_now
 
 
-# User CRUD
 def create_user(db: Session, username: str) -> User:
     """Create a new user."""
     user = User(username=username)
@@ -32,7 +31,6 @@ def get_user_by_username(db: Session, username: str) -> User | None:
     return db.query(User).filter(User.username == username).first()
 
 
-# City CRUD
 def create_city(
     db: Session,
     name: str,
@@ -67,18 +65,17 @@ def get_city_by_id(db: Session, city_id: int) -> City | None:
     return db.query(City).filter(City.id == city_id).first()
 
 
-# Forecast CRUD
 def update_city_forecast(
     db: Session,
     city_id: int,
-    forecast_data: list[dict[str, Any]],
+    forecast_data: dict[str, Any],
 ) -> City:
     """Update forecast for a city."""
     city = get_city_by_id(db, city_id)
     if not city:
         raise ValueError(f"City with id {city_id} not found")
 
-    city.forecast_data = forecast_data
+    city.forecast_data = forecast_data # type: ignore
     city.forecast_updated_at = utc_now()
     db.commit()
     db.refresh(city)
