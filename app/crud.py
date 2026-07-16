@@ -75,7 +75,7 @@ def update_city_forecast(
     if not city:
         raise ValueError(f"City with id {city_id} not found")
 
-    city.forecast_data = forecast_data # type: ignore
+    city.forecast_data = forecast_data  # type: ignore
     city.forecast_updated_at = utc_now()
     db.commit()
     db.refresh(city)

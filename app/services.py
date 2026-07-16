@@ -6,6 +6,7 @@ This module contains business logic for:
 """
 
 from datetime import UTC, datetime
+from logging import getLogger
 from typing import Any, Literal
 
 import aiohttp
@@ -14,6 +15,8 @@ from fastapi import HTTPException
 from .config import DEFAULT_PARAMS, OPEN_METEO_PARAMS, OPEN_METEO_URL
 
 ForecastType = Literal["current", "hourly"]
+
+logger = getLogger("uvicorn")
 
 
 def utc_now() -> datetime:
@@ -87,9 +90,7 @@ async def fetch_data(
                 "longitude": lon,
                 "forecast_days": 1,
             }
-            params[forecast_type] = [
-                OPEN_METEO_PARAMS[param] for param in fetch_params
-            ]
+            params[forecast_type] = [OPEN_METEO_PARAMS[param] for param in fetch_params]
 
             async with session.get(
                 OPEN_METEO_URL,
@@ -105,10 +106,7 @@ async def fetch_data(
                 response_json: dict[str, Any] = await response.json()
                 data: dict[str, Any] = response_json[forecast_type]
 
-                return {
-                    param: data[OPEN_METEO_PARAMS[param]]
-                    for param in fetch_params
-                }
+                return {param: data[OPEN_METEO_PARAMS[param]] for param in fetch_params}
 
     except aiohttp.ClientError as err:
         raise HTTPException(

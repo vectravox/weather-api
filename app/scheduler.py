@@ -5,7 +5,6 @@ using APScheduler.
 """
 
 import asyncio
-import logging
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -19,9 +18,7 @@ from .config import (
 )
 from .crud import update_city_forecast
 from .database import City, SessionLocal
-from .services import fetch_data
-
-logger = logging.getLogger("uvicorn")
+from .services import fetch_data, logger
 
 
 async def update_forecasts() -> None:
@@ -49,7 +46,9 @@ async def update_forecasts() -> None:
                     forecast_type="hourly",
                 )
                 update_city_forecast(db, city.id, forecast_data)
-                logger.info(f"--- Updated forecast for {city.name}")
+                logger.info(
+                    f"--- Updated forecast for {city.name}, user_id: {city.user.id}"
+                )
                 await asyncio.sleep(REQUEST_DELAY_SECONDS)
 
             except Exception as e:
@@ -60,7 +59,7 @@ async def update_forecasts() -> None:
 
 
 def run_update_forecasts() -> None:
-    """Wrapp function for APScheduler."""
+    """Wrap function for APScheduler."""
     asyncio.run(update_forecasts())
 
 

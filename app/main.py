@@ -3,17 +3,14 @@
 This module defines the main FastAPI application and all HTTP endpoints.
 """
 
-import logging
 from typing import Any
 
 from fastapi import FastAPI, Query
 
 from .scheduler import start_scheduler
-from .services import fetch_data
+from .services import fetch_data, logger
 
 app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS")
-
-logger = logging.getLogger("uvicorn")
 
 scheduler = start_scheduler()
 
