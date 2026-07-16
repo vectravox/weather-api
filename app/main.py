@@ -4,7 +4,6 @@ This module defines the main FastAPI application and all HTTP endpoints.
 """
 
 from fastapi import FastAPI, Query
-from . import config
 from .services import fetch_current_weather
 
 app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS")

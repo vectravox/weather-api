@@ -6,6 +6,7 @@ This module contains business logic for:
 """
 
 import aiohttp
+from typing import Any
 from fastapi import HTTPException
 from . import config
 
@@ -14,7 +15,9 @@ def split_params_by_comma(params: list[str]) -> list[str]:
     """Splits query parameters with comma into separate items.
 
     Example:
-        # /weather/current?lat=56.36&lon=84.51&params=temp,wind_speed&params=pressure
+        # For query strings like:
+        /weather/current?lat=56.36&lon=84.51&params=temp,wind_speed&params=pressure
+
         >>> split_params_by_comma(["temp,wind_speed", "pressure"])
         ["temp", "wind_speed", "pressure"]
     """
@@ -85,8 +88,8 @@ async def fetch_current_weather(
                     for param in fetch_params
                 }
 
-    except aiohttp.ClientError:
-        raise HTTPException(status_code=502, detail="Open-Meteo API connection error")
+    except aiohttp.ClientError as err:
+        raise HTTPException(status_code=502, detail="Open-Meteo API connection error") from err
 
-    except KeyError:
-        raise HTTPException(status_code=502, detail="Invalid query parameter")
+    except KeyError as err:
+        raise HTTPException(status_code=502, detail="Invalid query parameter") from err
