@@ -5,6 +5,7 @@ using APScheduler.
 """
 
 import asyncio
+import traceback
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -47,7 +48,8 @@ async def update_forecasts() -> None:
                 await asyncio.sleep(REQUEST_DELAY_SECONDS)
 
             except Exception as e:
-                logger.error(f"--- Failed to update forecast for {city.name}: {e}")
+                logger.error(f"--- Failed to update forecast for {city.name}: {repr(e)}")
+                logger.error(traceback.fromat_exc())
 
     finally:
         db.close()
