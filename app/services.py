@@ -6,6 +6,7 @@ This module contains business logic for:
 """
 
 from typing import Any, Literal
+from datetime import UTC, datetime
 
 import aiohttp
 from fastapi import HTTPException
@@ -13,6 +14,11 @@ from fastapi import HTTPException
 from . import config
 
 ForecastType = Literal["current", "hourly"]
+
+
+def utc_now() -> datetime:
+    """Return current UTC datetime."""
+    return datetime.now(UTC)
 
 
 def split_params_by_comma(params: list[str]) -> list[str]:
@@ -55,7 +61,7 @@ async def fetch_data(
     lon: float,
     fetch_params: list[str] | None = None,
     forecast_type: ForecastType = "current",
-) -> dict[str, Any]:
+) -> dict[str, float] | dict [str, list[float]]:
     """Fetch weather data from Open-Meteo API.
 
     Retrieves either current weather or hourly forecast for the specified

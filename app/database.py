@@ -1,8 +1,10 @@
 """Database models and connection setup."""
 
 from collections.abc import Iterator
-from datetime import UTC, datetime
 from typing import Any
+from datetime import datetime
+
+from .services import utc_now
 
 from sqlalchemy import (
     JSON,
@@ -23,11 +25,6 @@ from sqlalchemy.orm import (
 )
 
 from . import config
-
-
-def utc_now() -> datetime:
-    """Return current UTC datetime."""
-    return datetime.now(UTC)
 
 
 # Database connection
