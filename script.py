@@ -19,15 +19,15 @@ app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS"
 async def get_current_weather(
     lat: float = Query(..., ge=-90, le=90, description="Latitude"),
     lon: float = Query(..., ge=-180, le=180, description="Longitude"),
-    fetch_params: list[str] = Query(None, description="Fields to return"),
+    current: list[str] = Query(None, description="Fields to return"),
 ) -> dict[str, float]:
     """Method №1: get current temperature, wind speed, pressure."""
 
     # Default params
-    if fetch_params is None or fetch_params[0] == "":
-        fetch_params = ["temp", "wind_speed", "pressure"]
+    if current is None or current[0] == "":
+        current = ["temp", "wind_speed", "pressure"]
 
-    data = await fetch_current_weather(lat, lon, fetch_params)
+    data = await fetch_current_weather(lat, lon, current)
     return data
 
 
