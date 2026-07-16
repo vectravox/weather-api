@@ -17,5 +17,5 @@ async def get_current_weather(
 ) -> dict[str, Any]:
     """Method №1: get params temperature, wind speed, pressure."""
 
-    data = await fetch_data(lat, lon, forecast_type="hourly")
+    data = await fetch_data(lat, lon)
     return data

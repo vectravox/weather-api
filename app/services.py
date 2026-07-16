@@ -56,7 +56,7 @@ async def fetch_data(
     lon: float,
     fetch_params: list[str] | None = None,
     forecast_type: ForecastType = "current",
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """Fetch current weather data from Open-Meteo API.
 
     Example:
