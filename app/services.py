@@ -9,6 +9,10 @@ import aiohttp
 from typing import Any
 from fastapi import HTTPException
 from . import config
+from typing import Literal
+
+
+ForecastType = Literal["current", "hourly"]
 
 
 def split_params_by_comma(params: list[str]) -> list[str]:
@@ -47,10 +51,11 @@ def parse_params(params: list[str] | None) -> list[str]:
     return result
 
 
-async def fetch_current_weather(
+async def fetch_data(
     lat: float,
     lon: float,
     fetch_params: list[str] | None = None,
+    forecast_type: ForecastType = "current",
 ) -> dict[str, float]:
     """Fetch current weather data from Open-Meteo API.
 
@@ -63,11 +68,14 @@ async def fetch_current_weather(
 
     try:
         async with aiohttp.ClientSession() as session:
-            params: dict[str, float | list[str]] = {
+            params: dict[str, float | int | list[str]] = {
                 "latitude": lat,
                 "longitude": lon,
-                "current": [config.OPEN_METEO_PARAMS[param] for param in fetch_params],
+                "forecast_days": 1,
             }
+            params[forecast_type] = [
+                config.OPEN_METEO_PARAMS[param] for param in fetch_params
+            ]
 
             async with session.get(
                 config.OPEN_METEO_URL,
@@ -81,15 +89,17 @@ async def fetch_current_weather(
                     )
 
                 response_json: dict[str, Any] = await response.json()
-                weather_data: dict[str, Any] = response_json["current"]
+                data: dict[str, Any] = response_json[forecast_type]
 
                 return {
-                    param: float(weather_data[config.OPEN_METEO_PARAMS[param]])
+                    param: data[config.OPEN_METEO_PARAMS[param]]
                     for param in fetch_params
                 }
 
     except aiohttp.ClientError as err:
-        raise HTTPException(status_code=502, detail="Open-Meteo API connection error") from err
+        raise HTTPException(
+            status_code=502, detail="Open-Meteo API connection error"
+        ) from err
 
     except KeyError as err:
         raise HTTPException(status_code=502, detail="Invalid query parameter") from err
