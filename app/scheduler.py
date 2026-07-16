@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from .config import (
     FORECAST_UPDATE_INTERVAL_MINUTES,
-    JOBS_STATE_URL,
+    JOBS_DATABASE_URL,
     REQUEST_DELAY_SECONDS,
 )
 from .crud import update_city_forecast
@@ -63,7 +63,7 @@ def run_update_forecasts() -> None:
     asyncio.run(update_forecasts())
 
 
-jobstores = {"default": SQLAlchemyJobStore(url=JOBS_STATE_URL)}
+jobstores = {"default": SQLAlchemyJobStore(url=JOBS_DATABASE_URL)}
 
 
 def start_scheduler() -> BackgroundScheduler:

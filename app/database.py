@@ -22,11 +22,11 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-from .config import DATABASE_URL
+from .config import APP_DATABASE_URL
 from .services import utc_now
 
 # Database connection
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(APP_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
