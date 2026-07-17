@@ -16,7 +16,6 @@ from .config import (
     FORECAST_UPDATE_INTERVAL_MINUTES,
     JOBS_DATABASE_URL,
     OPEN_METEO_PARAMS,
-    REQUEST_DELAY_SECONDS,
 )
 from .crud import update_city_forecast
 from .database import City, SessionLocal
@@ -45,11 +44,10 @@ async def update_forecasts() -> None:
                 logger.info(
                     f"--- Updated forecast for {city.name} for user_id: {city.user.id}"
                 )
-                await asyncio.sleep(REQUEST_DELAY_SECONDS)
 
             except Exception as e:
-                logger.error(f"--- Failed to update forecast for {city.name}: {repr(e)}")
-                logger.error(traceback.fromat_exc())
+                logger.error(f"--- Failed to update forecast for {city.name}: {e!r}")
+                logger.error(traceback.format_exc())
 
     finally:
         db.close()

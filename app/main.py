@@ -5,8 +5,9 @@ This module defines the main FastAPI application and all HTTP endpoints.
 
 from typing import Any
 
-from fastapi import FastAPI, Query
+from fastapi import Depends, FastAPI
 
+from .models import CoordinatesParams
 from .scheduler import start_scheduler
 from .services import fetch_data, logger
 
@@ -24,9 +25,8 @@ def shutdown_scheduler() -> None:
 
 @app.get("/weather/current")
 async def get_current_weather(
-    lat: float = Query(..., ge=-90, le=90, description="Latitude"),
-    lon: float = Query(..., ge=-180, le=180, description="Longitude"),
+    coords: CoordinatesParams = Depends(),
 ) -> dict[str, Any]:
     """Return current temperature, wind speed, and pressure for coordinates."""
-    data = await fetch_data(lat, lon)
+    data = await fetch_data(coords.lat, coords.lon)
     return data

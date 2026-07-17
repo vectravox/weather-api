@@ -35,4 +35,4 @@ extend-select = [
     "SIM",
     "UP",
 ]
-ignore = ["D203", "D211", "D213"]
+ignore = ["B008", "D203", "D211", "D213"]
