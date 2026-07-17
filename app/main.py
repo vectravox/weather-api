@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import Depends, FastAPI
 
-from .models import CoordinatesParams
+from .models import WeatherCurrentParams
 from .scheduler import start_scheduler
 from .services import fetch_data, logger
 
@@ -25,7 +25,7 @@ def shutdown_scheduler() -> None:
 
 @app.get("/weather/current")
 async def get_current_weather(
-    coords: CoordinatesParams = Depends(),
+    coords: WeatherCurrentParams = Depends(),
 ) -> dict[str, Any]:
     """Return current temperature, wind speed, and pressure for coordinates."""
     data = await fetch_data(coords.lat, coords.lon)

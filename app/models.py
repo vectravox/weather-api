@@ -3,7 +3,7 @@
 from pydantic import BaseModel, Field
 
 
-class CoordinatesParams(BaseModel):
+class WeatherCurrentParams(BaseModel):
     """Query parameters for weather endpoints."""
 
     lat: float = Field(..., ge=-90, le=90)
