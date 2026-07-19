@@ -56,7 +56,9 @@ async def fetch_data(
                 "longitude": lon,
                 "forecast_days": 1,
             }
-            aiohttp_params[forecast_type] = [config.OPEN_METEO_PARAMS[param] for param in fetch_params]
+            aiohttp_params[forecast_type] = [
+                config.OPEN_METEO_PARAMS[param] for param in fetch_params
+            ]
 
             async with session.get(
                 config.OPEN_METEO_URL,
@@ -70,7 +72,10 @@ async def fetch_data(
                     )
                 response_json: dict[str, Any] = await response.json()
                 data: dict[str, Any] = response_json[forecast_type]
-                return {param: data[config.OPEN_METEO_PARAMS[param]] for param in fetch_params}
+                return {
+                    param: data[config.OPEN_METEO_PARAMS[param]]
+                    for param in fetch_params
+                }
 
     except aiohttp.ClientError as err:
         raise HTTPException(
@@ -78,4 +83,6 @@ async def fetch_data(
         ) from err
 
     except KeyError as err:
-        raise HTTPException(status_code=502, detail=f"Invalid query parameter: {err}") from err
+        raise HTTPException(
+            status_code=502, detail=f"Invalid query parameter: {err}"
+        ) from err

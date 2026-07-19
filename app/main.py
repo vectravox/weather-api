@@ -6,6 +6,7 @@ This module defines the main FastAPI application and all HTTP endpoints.
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Path, status
+from sqlalchemy.orm import Session
 
 from . import config, crud, models
 from .database import get_db
@@ -52,7 +53,7 @@ async def register_user(
     user = crud.create_user(db, payload.username)
     logger.info(f"--- New user registered: {user.username} (user_id: {user.id})")
 
-    return user
+    return models.UserResponse.model_validate(user)
 
 
 @app.post("/users/{user_id}/cities", status_code=status.HTTP_201_CREATED)
@@ -99,7 +100,7 @@ async def add_city(
         f"--- City '{city.name}' added for user {user.username} (ID: {user.id})"
     )
 
-    return city
+    return models.CityResponse.model_validate(city)
 
 
 @app.get("/users/{user_id}/cities")
@@ -112,19 +113,23 @@ def get_cities(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {query.user_id} not found"
+            detail=f"User with id {query.user_id} not found",
         )
 
     cities = crud.get_cities_by_user(db, query.user_id)
-    logger.info(f"--- Retrieved {len(cities)} cities for user {user.username} (ID: {query.user_id})")
+    logger.info(
+        f"--- Retrieved {len(cities)} cities for user {user.username} (ID: {query.user_id})"
+    )
 
-    return cities
+    return [models.CityResponse.model_validate(city) for city in cities]
 
 
 @app.get("/users/{user_id}/cities/{city_name}/{hour}")
 async def get_forecast_at_time(
     user_id: int = Path(..., gt=0, description="User ID must be more than 0"),
-    city_name: str = Path(..., min_length=1, max_length=100, pattern=r"^[a-zA-Z\s\-]+$"),
+    city_name: str = Path(
+        ..., min_length=1, max_length=100, pattern=r"^[a-zA-Z\s\-]+$"
+    ),
     hour: int = Path(..., ge=0, le=23),
     query: models.ForecastQuery = Depends(),
     db: Session = Depends(get_db),
@@ -134,20 +139,20 @@ async def get_forecast_at_time(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {user_id} not found"
+            detail=f"User with id {user_id} not found",
         )
 
     city = crud.get_city_by_name_and_user(db, city_name, user_id)
     if not city:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"City '{city_name}' not found for this user"
+            detail=f"City '{city_name}' not found for this user",
         )
 
     if not city.forecast_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No forecast available for {city.name}"
+            detail=f"No forecast available for {city.name}",
         )
 
     params = (
@@ -161,7 +166,7 @@ async def get_forecast_at_time(
         if not entry:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No {param} data found for {city.name}"
+                detail=f"No {param} data found for {city.name}",
             )
         forecast[param] = entry[hour]
 

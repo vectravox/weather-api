@@ -1,7 +1,8 @@
 """Pydantic models for request and response validation."""
 
-from pydantic import BaseModel, Field
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class WeatherCurrentQuery(BaseModel):
@@ -28,6 +29,8 @@ class UserResponse(BaseModel):
     username: str
     created_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CityCreate(BaseModel):
     """Model for adding a new city to track."""
@@ -53,6 +56,8 @@ class CityResponse(BaseModel):
     lon: float
     user_id: int
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ForecastQuery(BaseModel):

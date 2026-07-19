@@ -65,9 +65,7 @@ class City(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
-    forecast_data: Mapped[list[dict[str, Any]] | None] = mapped_column(
-        JSON, nullable=True
-    )
+    forecast_data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     forecast_updated_at: Mapped[datetime | None] = mapped_column(
         DateTime, nullable=True
     )

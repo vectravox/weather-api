@@ -5,7 +5,6 @@ using APScheduler.
 """
 
 import asyncio
-import traceback
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
