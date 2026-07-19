@@ -3,7 +3,7 @@
 APP_DATABASE_URL: str = "sqlite:///./weather.db"
 CLIENT_TIMEOUT_SECONDS = 10
 DEFAULT_PARAMS: list[str] = ["temp", "wind_speed", "pressure"]
-DELAY_BETWEEN_REQUESTS_SECONDS = 0
+DELAY_BETWEEN_REQUESTS_SECONDS = 2
 FORECAST_UPDATE_INTERVAL_MINUTES = 15  # Delay between forecast updates
 JOBS_DATABASE_URL: str = "sqlite:///./jobs.db"
 OPEN_METEO_PARAMS: dict[str, str] = {
