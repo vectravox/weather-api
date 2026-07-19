@@ -12,8 +12,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy.orm import Session
 
-from . import config
-from .crud import update_city_forecast
+from . import config, crud
 from .database import City, SessionLocal
 from .services import fetch_data, logger
 
@@ -31,19 +30,20 @@ async def update_forecasts() -> None:
         for city in cities:
             try:
                 forecast_data = await fetch_data(
-                    city.latitude,
-                    city.longitude,
+                    city.lat,
+                    city.lon,
                     fetch_params=list(config.OPEN_METEO_PARAMS),
                     forecast_type="hourly",
                 )
-                update_city_forecast(db, city.id, forecast_data)
+                crud.update_city_forecast(db, city.id, forecast_data)
                 logger.info(
                     f"--- Updated forecast for {city.name} for user_id: {city.user.id}"
                 )
 
+                await asyncio.sleep(config.DELAY_BETWEEN_REQUESTS_SECONDS)
+
             except Exception as err:
                 logger.error(f"--- Failed to update forecast for {city.name}: {err!r}")
-                logger.error(traceback.format_exc())
 
     finally:
         db.close()

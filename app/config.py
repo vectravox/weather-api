@@ -2,9 +2,10 @@
 
 APP_DATABASE_URL: str = "sqlite:///./weather.db"
 CLIENT_TIMEOUT_SECONDS = 10
-JOBS_DATABASE_URL: str = "sqlite:///./jobs.db"
+DEFAULT_PARAMS: list[str] = ["temp", "wind_speed", "pressure"]
+DELAY_BETWEEN_REQUESTS_SECONDS = 0
 FORECAST_UPDATE_INTERVAL_MINUTES = 15  # Delay between forecast updates
-OPEN_METEO_URL: str = "https://api.open-meteo.com/v1/forecast"
+JOBS_DATABASE_URL: str = "sqlite:///./jobs.db"
 OPEN_METEO_PARAMS: dict[str, str] = {
     "temp": "temperature_2m",
     "wind_speed": "wind_speed_10m",
@@ -12,4 +13,4 @@ OPEN_METEO_PARAMS: dict[str, str] = {
     "humidity": "relative_humidity_2m",
     "precipitation": "precipitation",
 }
-DEFAULT_PARAMS: list[str] = ["temp", "wind_speed", "pressure"]
+OPEN_METEO_URL: str = "https://api.open-meteo.com/v1/forecast"

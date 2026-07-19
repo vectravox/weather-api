@@ -39,7 +39,7 @@ def create_city(
     user_id: int,
 ) -> City:
     """Add a new city for a specific user."""
-    city = City(name=name, latitude=lat, longitude=lon, user_id=user_id)
+    city = City(name=name, lat=lat, lon=lon, user_id=user_id)
     db.add(city)
     db.commit()
     db.refresh(city)
@@ -80,11 +80,3 @@ def update_city_forecast(
     db.commit()
     db.refresh(city)
     return city
-
-
-def delete_city(db: Session, city_id: int) -> None:
-    """Delete a city by ID."""
-    city = get_city_by_id(db, city_id)
-    if city:
-        db.delete(city)
-        db.commit()

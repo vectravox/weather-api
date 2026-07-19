@@ -27,3 +27,22 @@ class UserResponse(BaseModel):
     id: int
     username: str
     created_at: datetime
+
+
+class CityCreate(BaseModel):
+    """Model for adding a new city to track."""
+
+    name: str = Field(..., min_length=1, max_length=100)
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    user_id: int = Field(..., gt=0, description="ID of the user")
+
+
+class CityResponse(BaseModel):
+    """Response model for city data."""
+    id: int
+    name: str
+    lat: float
+    lon: float
+    user_id: int
+    created_at: datetime
