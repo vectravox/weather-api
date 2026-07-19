@@ -4,11 +4,11 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 
-class WeatherCurrentParams(BaseModel):
+class GetCurrentWeather(BaseModel):
     """Query parameters for weather endpoints."""
 
-    lat: float = Field(..., ge=-90, le=90, description="Latitude.")
-    lon: float = Field(..., ge=-180, le=180, description="Longitude.")
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
     params: str = Field(
         default="",
         description="Comma-separated list of weather parameters to return.",
@@ -35,7 +35,7 @@ class CityCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     lat: float = Field(..., ge=-90, le=90)
     lon: float = Field(..., ge=-180, le=180)
-    user_id: int = Field(..., gt=0, description="ID of the user")
+    user_id: int = Field(..., gt=0)
 
 
 class CityResponse(BaseModel):

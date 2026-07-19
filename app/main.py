@@ -26,7 +26,7 @@ def shutdown_scheduler() -> None:
 
 @app.get("/weather/current")
 async def get_current_weather(
-    query: models.WeatherCurrentParams = Depends(),
+    query: models.GetCurrentWeather = Depends(),
 ) -> dict[str, Any]:
     """Return current temperature, wind speed, and pressure for coordinates."""
     params = (
@@ -100,3 +100,22 @@ async def add_city(
     )
 
     return city
+
+
+@app.get("/users/{user_id}/cities")
+def get_cities(
+    user_id: int,
+    db: Session = Depends(get_db),
+) -> list[models.CityResponse]:
+    """Get all cities tracked by a specific user."""
+    user = crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {user_id} not found"
+        )
+
+    cities = crud.get_cities_by_user(db, user_id)
+    logger.info(f"--- Retrieved {len(cities)} cities for user {user.username} (ID: {user_id})")
+
+    return cities
