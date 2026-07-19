@@ -7,9 +7,9 @@ from typing import Any
 
 from fastapi import Depends, FastAPI
 
-from .models import WeatherCurrentParams
+from . import config, models
 from .scheduler import start_scheduler
-from .services import fetch_data, logger
+from .services import fetch_data, logger, split_fields_by_comma
 
 app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS")
 
@@ -25,8 +25,11 @@ def shutdown_scheduler() -> None:
 
 @app.get("/weather/current")
 async def get_current_weather(
-    coords: WeatherCurrentParams = Depends(),
+    query: models.WeatherCurrentParams = Depends(),
 ) -> dict[str, Any]:
     """Return current temperature, wind speed, and pressure for coordinates."""
-    data = await fetch_data(coords.lat, coords.lon)
+    fields = (
+        split_fields_by_comma(query.fields) if query.fields else config.DEFAULT_PARAMS
+    )
+    data = await fetch_data(query.lat, query.lon, fields)
     return data

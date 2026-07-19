@@ -12,7 +12,7 @@ from typing import Any, Literal
 import aiohttp
 from fastapi import HTTPException
 
-from .config import DEFAULT_PARAMS, OPEN_METEO_PARAMS, OPEN_METEO_URL
+from . import config
 
 ForecastType = Literal["current", "hourly"]
 
@@ -24,45 +24,15 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-def split_params_by_comma(params: list[str]) -> list[str]:
-    """Split query parameters with comma into separate items.
-
-    Example:
-        # Query string:
-        /weather/current?lat=56.36&lon=84.51&params=temp,wind_speed&params=pressure
-
-        >>> split_params_by_comma(["temp,wind_speed", "pressure"])
-        ["temp", "wind_speed", "pressure"]
-
-    """
-    result: list[str] = []
-
-    for param in params:
-        if "," in param:
-            result.extend([f.strip() for f in param.split(",") if f.strip()])
-        elif param.strip():
-            result.append(param.strip())
-
-    return result
-
-
-def parse_params(params: list[str] | None) -> list[str]:
-    """Parse query parameters and apply defaults."""
-    if params is None:
-        return DEFAULT_PARAMS.copy()
-
-    result = split_params_by_comma(params)
-
-    if not result:
-        return DEFAULT_PARAMS.copy()
-
-    return result
+def split_fields_by_comma(fields: str) -> list[str]:
+    """Split query parameter with commas into separate items."""
+    return [f.strip() for f in fields.split(",") if f.strip()]
 
 
 async def fetch_data(
     lat: float,
     lon: float,
-    fetch_params: list[str] | None = None,
+    fetch_params: list[str],
     forecast_type: ForecastType = "current",
 ) -> dict[str, Any]:
     """Fetch weather data from Open-Meteo API.
@@ -73,40 +43,34 @@ async def fetch_data(
     Args:
         lat: Latitude in degrees (-90 to 90).
         lon: Longitude in degrees (-180 to 180).
-        fetch_params: List of parameter names to fetch.
-            Available: "temp", "wind_speed", "pressure", "humidity", "precipitation".
-            Defaults to ["temp", "wind_speed", "pressure"].
+        fetch_params: Parameter names to fetch separated by comma.
         forecast_type: Type of forecast to fetch.
             - "current": Real-time weather at the moment of request.
             - "hourly": Hourly forecast for the current day (24 entries).
 
     """
-    fetch_params = parse_params(fetch_params)
-
     try:
         async with aiohttp.ClientSession() as session:
-            params: dict[str, float | int | list[str]] = {
+            aiohttp_params: dict[str, float | int | list[str]] = {
                 "latitude": lat,
                 "longitude": lon,
                 "forecast_days": 1,
             }
-            params[forecast_type] = [OPEN_METEO_PARAMS[param] for param in fetch_params]
+            aiohttp_params[forecast_type] = [config.OPEN_METEO_PARAMS[param] for param in fetch_params]
 
             async with session.get(
-                OPEN_METEO_URL,
-                params=params,
-                timeout=aiohttp.ClientTimeout(total=10),
+                config.OPEN_METEO_URL,
+                params=aiohttp_params,
+                timeout=aiohttp.ClientTimeout(total=config.CLIENT_TIMEOUT_SECONDS),
             ) as response:
                 if response.status != 200:
                     raise HTTPException(
                         status_code=502,
                         detail=f"Open-Meteo API error: status {response.status}",
                     )
-
                 response_json: dict[str, Any] = await response.json()
                 data: dict[str, Any] = response_json[forecast_type]
-
-                return {param: data[OPEN_METEO_PARAMS[param]] for param in fetch_params}
+                return {param: data[config.OPEN_METEO_PARAMS[param]] for param in fetch_params}
 
     except aiohttp.ClientError as err:
         raise HTTPException(
@@ -114,4 +78,4 @@ async def fetch_data(
         ) from err
 
     except KeyError as err:
-        raise HTTPException(status_code=502, detail="Invalid query parameter") from err
+        raise HTTPException(status_code=502, detail=f"Invalid query parameter: {err}") from err

@@ -12,11 +12,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy.orm import Session
 
-from .config import (
-    FORECAST_UPDATE_INTERVAL_MINUTES,
-    JOBS_DATABASE_URL,
-    OPEN_METEO_PARAMS,
-)
+from . import config
 from .crud import update_city_forecast
 from .database import City, SessionLocal
 from .services import fetch_data, logger
@@ -37,7 +33,7 @@ async def update_forecasts() -> None:
                 forecast_data = await fetch_data(
                     city.latitude,
                     city.longitude,
-                    fetch_params=list(OPEN_METEO_PARAMS),
+                    fetch_params=list(config.OPEN_METEO_PARAMS),
                     forecast_type="hourly",
                 )
                 update_city_forecast(db, city.id, forecast_data)
@@ -45,8 +41,8 @@ async def update_forecasts() -> None:
                     f"--- Updated forecast for {city.name} for user_id: {city.user.id}"
                 )
 
-            except Exception as e:
-                logger.error(f"--- Failed to update forecast for {city.name}: {e!r}")
+            except Exception as err:
+                logger.error(f"--- Failed to update forecast for {city.name}: {err!r}")
                 logger.error(traceback.format_exc())
 
     finally:
@@ -58,7 +54,7 @@ def run_update_forecasts() -> None:
     asyncio.run(update_forecasts())
 
 
-jobstores = {"default": SQLAlchemyJobStore(url=JOBS_DATABASE_URL)}
+jobstores = {"default": SQLAlchemyJobStore(url=config.JOBS_DATABASE_URL)}
 
 
 def start_scheduler() -> BackgroundScheduler:
@@ -66,12 +62,12 @@ def start_scheduler() -> BackgroundScheduler:
     scheduler = BackgroundScheduler(jobstores=jobstores)
     scheduler.add_job(
         run_update_forecasts,
-        trigger=IntervalTrigger(minutes=FORECAST_UPDATE_INTERVAL_MINUTES),
+        trigger=IntervalTrigger(minutes=config.FORECAST_UPDATE_INTERVAL_MINUTES),
         id="run_update_forecasts",
         replace_existing=True,
     )
     scheduler.start()
     logger.info(
-        f"--- Scheduler started. Forecasts will update every {FORECAST_UPDATE_INTERVAL_MINUTES} minutes."
+        f"--- Scheduler started. Forecasts will update every {config.FORECAST_UPDATE_INTERVAL_MINUTES} minutes."
     )
     return scheduler
