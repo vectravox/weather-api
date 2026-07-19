@@ -24,9 +24,9 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-def split_fields_by_comma(fields: str) -> list[str]:
+def split_params_by_comma(params: str) -> list[str]:
     """Split query parameter with commas into separate items."""
-    return [f.strip() for f in fields.split(",") if f.strip()]
+    return [f.strip() for f in params.split(",") if f.strip()]
 
 
 async def fetch_data(
