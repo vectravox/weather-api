@@ -43,10 +43,11 @@ class UserResponse(BaseModel):
 class CityCreate(BaseModel):
     """Model for adding a new city to track."""
 
-    user_id: int = Field(..., gt=0, description="User ID must be more than 0"),
     name: str = Field(..., min_length=1, max_length=100)
     lat: float = Field(..., ge=-90, le=90)
     lon: float = Field(..., ge=-180, le=180)
+    user_id: int = Field(..., gt=0)
+
 
 class CitiesQuery(BaseModel):
     """Query parameters for cities list of a user."""
@@ -70,11 +71,6 @@ class CityResponse(BaseModel):
 class ForecastQuery(BaseModel):
     """Query parameters for forecast at specific time."""
 
-    user_id: int = Field(..., gt=0, description="User ID must be more than 0"),
-    city_name: str = Field(
-        ..., min_length=1, max_length=100, pattern=r"^[a-zA-Z\s\-]+$"
-    ),
-    hour: int = Field(..., ge=0, le=23),
     params: str = Field(
         default="",
         description="Comma-separated: temp, humidity, wind_speed, precipitation, pressure",

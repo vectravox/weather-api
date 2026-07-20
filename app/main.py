@@ -134,22 +134,27 @@ def get_cities(
 
 @app.get("/users/{user_id}/cities/{city_name}/{hour}")
 async def get_forecast_at_time(
+    user_id: int = Path(..., gt=0, description="User ID must be more than 0"),
+    city_name: str = Path(
+        ..., min_length=1, max_length=100, pattern=r"^[a-zA-Z\s\-]+$"
+    ),
+    hour: int = Path(..., ge=0, le=23),
     query: models.ForecastQuery = Depends(),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Get weather forecast for a city at a specific time."""
-    user = crud.get_user_by_id(db, query.user_id)
+    user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {query.user_id} not found",
+            detail=f"User with id {user_id} not found",
         )
 
-    city = crud.get_city_by_name_and_user(db, query.city_name, query.user_id)
+    city = crud.get_city_by_name_and_user(db, city_name, user_id)
     if not city:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"City '{query.city_name}' not found for this user",
+            detail=f"City '{city_name}' not found for this user",
         )
 
     if not city.forecast_data:
@@ -171,6 +176,6 @@ async def get_forecast_at_time(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"No {param} data found for {city.name}",
             )
-        forecast[param] = entry[query.hour]
+        forecast[param] = entry[hour]
 
     return forecast
