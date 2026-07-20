@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from . import config
+
 
 class WeatherCurrentQuery(BaseModel):
     """Query parameters for weather endpoints."""
@@ -21,9 +23,9 @@ class UserRegister(BaseModel):
 
     username: str = Field(
         ...,
-        min_length=3,
-        max_length=50,
-        pattern=r"^[a-zA-Z0-9_]+$",
+        min_length=config.USERNAME_MIN_LENGTH,
+        max_length=config.USERNAME_MAX_LENGTH,
+        pattern=config.USERNAME_PATTERN,
         examples=["john_doe"],
     )
 

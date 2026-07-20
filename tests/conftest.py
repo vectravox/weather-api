@@ -19,9 +19,6 @@ def test_db() -> Generator[Session]:
     fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
 
-    # engine = create_engine(
-    #     "sqlite:///:memory:", connect_args={"check_same_thread": False}
-    # )
     engine = create_engine(f"sqlite:///{db_path}")
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -43,6 +40,7 @@ def test_client(test_db: Session) -> Generator[TestClient]:
         return test_db
 
     app.dependency_overrides[get_db] = get_test_db
+
     try:
         yield TestClient(app)
     finally:
