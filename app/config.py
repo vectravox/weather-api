@@ -6,7 +6,7 @@ APP_DATABASE_URL: str = "sqlite:///./weather.db"
 SCHEDULER_DATABASE_URL: str = "sqlite:///./jobs.db"
 
 CLIENT_TIMEOUT_SECONDS = 10
-DELAY_BETWEEN_REQUESTS_SECONDS = 2 # Delay between requests to avoid Open-Meteo API rate limiting
+DELAY_BETWEEN_REQUESTS_SECONDS = 2  # Delay between requests to avoid Open-Meteo API rate limiting
 FORECAST_UPDATE_INTERVAL_MINUTES = 15  # Delay between forecast updates
 
 DEFAULT_PARAMS: list[str] = ["temp", "wind_speed", "pressure"]

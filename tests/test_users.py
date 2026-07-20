@@ -31,6 +31,7 @@ def test_register_user_duplicate_username(test_client: TestClient) -> None:
     assert response.status_code == 409
     assert "already taken" in response.json()["detail"]
 
+
 # NOTE: Update app/config.py if you change these test values
 @pytest.mark.parametrize(
     "username",
