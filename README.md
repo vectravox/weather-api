@@ -183,7 +183,7 @@ GET /users/{user_id}/cities
 
 **Запрос:**
 ```bash
-curl -X GET "http://127.0.0.1:8000/users/3/cities"
+curl -X GET "http://127.0.0.1:8000/users/1/cities"
 ```
 
 **Ответ:**
@@ -194,7 +194,7 @@ curl -X GET "http://127.0.0.1:8000/users/3/cities"
     "name": "Moscow",
     "lat": 55.7558,
     "lon": 37.6173,
-    "user_id": 3,
+    "user_id": 1,
     "created_at": "2026-07-20T10:31:00.123456"
   },
   {
@@ -202,7 +202,7 @@ curl -X GET "http://127.0.0.1:8000/users/3/cities"
     "name": "London",
     "lat": 51.5074,
     "lon": -0.1278,
-    "user_id": 3,
+    "user_id": 1,
     "created_at": "2026-07-20T10:32:00.123456"
   }
 ]
