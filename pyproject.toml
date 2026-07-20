@@ -8,7 +8,6 @@ dependencies = [
     "aiohttp>=3.14.1",
     "apscheduler>=3.11.3",
     "fastapi>=0.139.0",
-    "ruff>=0.15.21",
     "sqlalchemy>=2.0.51",
     "uvicorn>=0.51.0",
 ]
@@ -18,6 +17,7 @@ dev = [
     "httpx2>=2.7.0",
     "mypy>=2.3.0",
     "pytest>=9.1.1",
+    "ruff>=0.15.22",
 ]
 
 [tool.mypy]
