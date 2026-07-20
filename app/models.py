@@ -46,7 +46,6 @@ class CityCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     lat: float = Field(..., ge=-90, le=90)
     lon: float = Field(..., ge=-180, le=180)
-    user_id: int = Field(..., gt=0)
 
 
 class CitiesQuery(BaseModel):

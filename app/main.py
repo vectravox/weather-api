@@ -66,18 +66,19 @@ async def register_user(
 
 @app.post("/users/{user_id}/cities", status_code=status.HTTP_201_CREATED)
 async def add_city(
-    payload: models.CityCreate = Depends(),
+    payload: models.CityCreate,
+    user_id: int = Path(..., gt=0),
     db: Session = Depends(get_db),
 ) -> models.CityResponse:
     """Add a city to track weather forecasts for a specific user."""
-    user = crud.get_user_by_id(db, payload.user_id)
+    user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {payload.user_id} not found",
+            detail=f"User with id {user_id} not found",
         )
 
-    city = crud.get_city_by_name_and_user(db, payload.name, payload.user_id)
+    city = crud.get_city_by_name_and_user(db, payload.name, user_id)
     if city:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -89,7 +90,7 @@ async def add_city(
         name=payload.name,
         lat=payload.lat,
         lon=payload.lon,
-        user_id=payload.user_id,
+        user_id=user_id,
     )
 
     try:
