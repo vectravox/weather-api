@@ -3,7 +3,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.crud import get_user_by_username
+from app import crud
 
 
 def test_register_user_success(test_client: TestClient, test_db: Session) -> None:
@@ -19,5 +19,5 @@ def test_register_user_success(test_client: TestClient, test_db: Session) -> Non
     assert "created_at" in data
     assert isinstance(data["id"], int)
 
-    user = get_user_by_username(test_db, "testuser")
+    user = crud.get_user_by_username(test_db, "testuser")
     assert user is not None

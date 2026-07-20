@@ -3,9 +3,10 @@
 This module defines the main FastAPI application and all HTTP endpoints.
 """
 
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from typing import Any
 
-from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
@@ -16,7 +17,8 @@ from .services import fetch_data, logger, split_params_by_comma
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    """Manage application lifecycle: startup and shutdown events."""
     scheduler = start_scheduler()
     logger.info(
         f"--- Scheduler started. Forecasts will update every {config.FORECAST_UPDATE_INTERVAL_MINUTES} minutes."

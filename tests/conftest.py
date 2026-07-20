@@ -1,15 +1,17 @@
+"""Pytest fixtures for Weather API tests."""
+
+import os
+import tempfile
 from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.database import Base, get_db
 from app.main import app
 
-
-import tempfile, os
 
 @pytest.fixture
 def test_db() -> Generator[Session]:
