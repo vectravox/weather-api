@@ -16,6 +16,7 @@ OPEN_METEO_PARAMS: dict[str, str] = {
 OPEN_METEO_URL: str = "https://api.open-meteo.com/v1/forecast"
 
 # User validation
+# IMPORTANT: tests/test_users.py update may be needed if you change this constraint
 USERNAME_MIN_LENGTH: int = 3
 USERNAME_MAX_LENGTH: int = 50
-USERNAME_PATTERN: str = r"^[a-zA-Z0-9_]+$" # IMPORTANT: Update tests/test_users.py if you change this constraint
+USERNAME_PATTERN: str = r"^[a-zA-Z0-9_]+$"

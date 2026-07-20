@@ -1,4 +1,4 @@
-"""Tests for user registration endpoints."""
+"""Tests for user registration endpoint."""
 
 import pytest
 from fastapi.testclient import TestClient
