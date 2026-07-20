@@ -5,6 +5,7 @@ This module defines the main FastAPI application and all HTTP endpoints.
 
 from typing import Any
 
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
@@ -13,16 +14,21 @@ from .database import get_db
 from .scheduler import start_scheduler
 from .services import fetch_data, logger, split_params_by_comma
 
-app: FastAPI = FastAPI(title="Weather API", description="Test task for InfoTeCS")
 
-scheduler = start_scheduler()
-
-
-@app.on_event("shutdown")
-def shutdown_scheduler() -> None:
-    """Shutdown background scheduler on app exit."""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler = start_scheduler()
+    logger.info(
+        f"--- Scheduler started. Forecasts will update every {config.FORECAST_UPDATE_INTERVAL_MINUTES} minutes."
+    )
+    yield
     scheduler.shutdown()
-    logger.info("--- Scheduler shut down")
+    logger.info("--- Scheduler shut down during application shutdown")
+
+
+app: FastAPI = FastAPI(
+    title="Weather API", description="Test task for InfoTeCS", lifespan=lifespan
+)
 
 
 @app.get("/weather/current")
@@ -39,7 +45,7 @@ async def get_current_weather(
 
 @app.post("/users", status_code=status.HTTP_201_CREATED)
 async def register_user(
-    payload: models.UserRegister = Depends(),
+    payload: models.UserRegister,
     db: Session = Depends(get_db),
 ) -> models.UserResponse:
     """Register a new user and return their ID."""

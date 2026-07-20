@@ -66,7 +66,4 @@ def start_scheduler() -> BackgroundScheduler:
         replace_existing=True,
     )
     scheduler.start()
-    logger.info(
-        f"--- Scheduler started. Forecasts will update every {config.FORECAST_UPDATE_INTERVAL_MINUTES} minutes."
-    )
     return scheduler

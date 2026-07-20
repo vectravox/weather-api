@@ -19,7 +19,7 @@ class WeatherCurrentQuery(BaseModel):
 class UserRegister(BaseModel):
     """Model for user registration."""
 
-    username: str = Field(..., min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_]+$")
+    username: str = Field(..., min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_]+$", examples=["john_doe"])
 
 
 class UserResponse(BaseModel):
