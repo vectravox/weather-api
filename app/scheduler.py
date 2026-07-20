@@ -53,7 +53,7 @@ def run_update_forecasts() -> None:
     asyncio.run(update_forecasts())
 
 
-jobstores = {"default": SQLAlchemyJobStore(url=config.JOBS_DATABASE_URL)}
+jobstores = {"default": SQLAlchemyJobStore(url=config.SCHEDULER_DATABASE_URL)}
 
 
 def start_scheduler() -> BackgroundScheduler:
